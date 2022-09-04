@@ -18,13 +18,13 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_main" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_upload"
@@ -33,10 +33,22 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="32dp"
+            android:backgroundTint="@color/fab_color"
             android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_baseline_upload_24" />
+            app:srcCompat="@drawable/outline_file_upload_24" />
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_main"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

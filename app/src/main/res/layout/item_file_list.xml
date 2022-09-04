@@ -18,7 +18,7 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_fiie_list"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="140dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="16dp"
@@ -35,19 +35,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_size"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/outline_article_24" />
+                app:layout_constraintTop_toTopOf="@+id/tv_name"
+                app:srcCompat="@drawable/outline_article_36" />
 
             <TextView
                 android:id="@+id/tv_name"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"
-                android:layout_width="wrap_content"
+                style="@style/TextAppearance.MaterialComponents.Headline6"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="24dp"
+                android:layout_marginEnd="24dp"
+                android:singleLine="true"
                 android:text="@{m.fileName}"
+                app:layout_constraintEnd_toStartOf="@+id/img_share"
                 app:layout_constraintStart_toEndOf="@+id/imageView"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="File Name" />
@@ -57,11 +60,56 @@
                 style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:text="@{m.fileSize}"
                 app:layout_constraintStart_toStartOf="@+id/tv_name"
                 app:layout_constraintTop_toBottomOf="@+id/tv_name"
                 tools:text="46.6K" />
+
+            <ImageView
+                android:id="@+id/img_share"
+                style="@style/ImageButton"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/outline_share_24" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="4dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_size">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_copy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:backgroundTint="@color/white"
+                    android:minHeight="38dip"
+                    android:text="@android:string/copy"
+                    android:textColor="@color/black"
+                    app:rippleColor="@color/card_background" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_download"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/white"
+                    android:minHeight="38dip"
+                    android:text="@string/download"
+                    android:textColor="@color/black"
+                    app:rippleColor="@color/card_background" />
+            </LinearLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 </layout>

@@ -4,8 +4,12 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/outline_article_24.xml" value="0.2085" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.19610507246376813" />
-        <entry key="app/src/main/res/layout/item_file_list.xml" value="0.23739535566689313" />
+        <entry key="app/src/main/res/drawable/outline_file_upload_24.xml" value="0.217" />
+        <entry key="app/src/main/res/drawable/outline_share_24.xml" value="0.217" />
+        <entry key="app/src/main/res/drawable/shape_ovel.xml" value="0.2134140014648438" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.18613497969033066" />
+        <entry key="app/src/main/res/layout/dialog_details.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/item_file_list.xml" value="0.2113919474283854" />
       </map>
     </option>
   </component>
