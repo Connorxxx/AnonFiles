@@ -1,20 +1,16 @@
 package com.connor.anonfiles
 
-import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
 import android.view.View
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.appcompat.widget.AlertDialogLayout
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.connor.anonfiles.databinding.ActivityMainBinding
 import com.connor.anonfiles.databinding.DialogDetailsBinding
+import com.connor.anonfiles.model.net.AnonNet
 import com.connor.anonfiles.model.room.FileData
 import com.connor.anonfiles.tools.VTools
 import com.connor.anonfiles.viewmodel.MainViewModel
@@ -24,7 +20,6 @@ import com.drake.brv.utils.addModels
 import com.drake.brv.utils.models
 import com.drake.brv.utils.setup
 import com.drake.engine.base.EngineActivity
-import com.drake.logcat.LogCat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -70,11 +65,17 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 clipboard.setPrimaryClip(clip)
                 vTools.showSnackBar(binding.rv, "Copy Success")
             }
+            R.id.btn_download.onClick {
+                viewModel.downloadFile(getModel<FileData>().fullUrl!!)
+            }
         }
         binding.rv.models = viewModel.getFileList()
         viewModel.fileData.observe(this, Observer {
             binding.rv.addModels(listOf(viewModel.fileData.value))
             binding.rv.scrollToPosition(binding.rv.adapter!!.itemCount - 1)
+        })
+        viewModel.dlFileData.observe(this, Observer {
+            vTools.showSnackBar(binding.rv, "Download")
         })
     }
 

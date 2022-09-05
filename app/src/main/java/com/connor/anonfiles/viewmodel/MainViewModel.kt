@@ -8,8 +8,7 @@ import com.anggrayudi.storage.file.fullName
 import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
 import com.connor.anonfiles.model.room.FileData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okio.buffer
 import okio.sink
 import okio.source
@@ -23,32 +22,31 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
 
     private val fileLiveData = MutableLiveData<File>()
 
+    private val dlFileLiveData = MutableLiveData<String>()
+
     val fileData: LiveData<FileData> = Transformations.switchMap(fileLiveData) {
         repository.postFile(it)
     }
 
+    val dlFileData: LiveData<File> = Transformations.switchMap(dlFileLiveData) {
+        repository.downloadFile(it)
+    }
+
     private fun getFileData(file: File) {
-        fileLiveData.value = file
+        fileLiveData.postValue(file)
+    }
+
+    fun downloadFile(url: String) {
+        dlFileLiveData.value = url
     }
 
     fun getFileDatabase() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getFileDatabase()
-        }
+        repository.getFileDatabase()
     }
 
     fun deleteFileDatabase(fileId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteFileDatabase(fileId)
-        }
+        repository.deleteFileDatabase(fileId)
     }
-
-    fun deleteFile(fileData: FileData) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.delete(fileData)
-        }
-    }
-
 
     fun getFileList() = repository.getFileList()
 
@@ -60,27 +58,44 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         storageHelper = SimpleStorageHelper(activity)
         storageHelper.onFileSelected = { _, files ->
             val documentFile = files.first()
-            viewModelScope.launch(Dispatchers.Main) {
-                val file = getFile(
-                    documentFile.uri,
-                    documentFile.fullName
-                )
+            viewModelScope.launch(Dispatchers.IO) {
+                val file = getFile(documentFile.uri, documentFile.fullName)
                 getFileData(file)
             }
+
         }
     }
 
     private suspend fun getFile(
         uri: Uri,
         name: String,
-    ) = suspendCoroutine {
-        viewModelScope.launch(Dispatchers.IO) {
-            val file = File(context.filesDir.path, name)
+    ) = withContext(Dispatchers.IO) {
+        val file = File(context.filesDir.path, name)
+        kotlin.runCatching {
             val inputStream = context.contentResolver.openInputStream(uri)
             inputStream?.source()?.buffer().use { buffer ->
                 buffer?.readAll(file.sink())
             }
-            it.resume(file)
+           // it.resume(file)
         }
+        file
+    }
+
+//    private suspend fun getFile(uri: Uri, name: String): File {
+//        val file = File(context.filesDir.path, name)
+//        withContext(Dispatchers.IO) {
+//            kotlin.runCatching {
+//                val inputStream = context.contentResolver.openInputStream(uri)
+//                inputStream?.source()?.buffer().use { buffer ->
+//                    buffer?.readAll(file.sink())
+//                }
+//            }
+//        }
+//        return file
+//    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.job.cancel()
     }
 }

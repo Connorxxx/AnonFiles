@@ -1,4 +1,4 @@
-package com.connor.anonfiles.model
+package com.connor.anonfiles.model.net
 
 import kotlinx.serialization.Serializable
 
