@@ -3,10 +3,7 @@ package com.connor.anonfiles
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.anggrayudi.storage.extension.postToUi
 import com.connor.anonfiles.model.net.AnonNet
-import com.connor.anonfiles.model.net.AnonNet.downloadFile
-import com.connor.anonfiles.model.net.AnonNet.postFile
 import com.connor.anonfiles.model.room.FileDao
 import com.connor.anonfiles.model.room.FileData
 import kotlinx.coroutines.CoroutineScope
@@ -50,8 +47,7 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
     fun postFile(file: File): LiveData<FileData> {
         val fileLiveData = MutableLiveData<FileData>()
         ioScope.launch {
-            ioScope.postToUi {  }
-            val fileData = postFile(file, ioScope.postFile(file).await())
+            val fileData = anonNet.postFile(file)
             fileData.id = fileDao.insertFile(fileData)
             fileLiveData.postValue(fileData)
         }
@@ -61,7 +57,7 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
     fun downloadFile(url: String): LiveData<File> {
         val dlLiveData = MutableLiveData<File>()
         ioScope.launch {
-            dlLiveData.postValue(ioScope.downloadFile(url).await())
+            dlLiveData.postValue(anonNet.downloadFile(url).await())
         }
         return dlLiveData
     }

@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.connor.anonfiles.databinding.ActivityMainBinding
 import com.connor.anonfiles.databinding.DialogDetailsBinding
-import com.connor.anonfiles.model.net.AnonNet
 import com.connor.anonfiles.model.room.FileData
 import com.connor.anonfiles.tools.VTools
 import com.connor.anonfiles.viewmodel.MainViewModel
@@ -28,7 +27,7 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
 
     private val viewModel: MainViewModel by viewModel()
 
-    private val vTools: VTools by inject()
+    private val tools: VTools by inject()
 
     override fun initView() {
         binding.v = this
@@ -57,13 +56,13 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 alertDialog.show()
             }
             R.id.img_share.onClick {
-                vTools.shareLink(getModel<FileData>().shortUrl!!, this@MainActivity, binding.rv)
+                tools.shareLink(getModel<FileData>().shortUrl!!, this@MainActivity, binding.rv)
             }
             R.id.btn_copy.onClick {
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip: ClipData = ClipData.newPlainText("link", getModel<FileData>().shortUrl!!)
                 clipboard.setPrimaryClip(clip)
-                vTools.showSnackBar(binding.rv, "Copy Success")
+                tools.showSnackBar(binding.rv, "Copy Success")
             }
             R.id.btn_download.onClick {
                 viewModel.downloadFile(getModel<FileData>().fullUrl!!)
@@ -75,7 +74,7 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             binding.rv.scrollToPosition(binding.rv.adapter!!.itemCount - 1)
         })
         viewModel.dlFileData.observe(this, Observer {
-            vTools.showSnackBar(binding.rv, "Download")
+            tools.showSnackBar(binding.rv, "Download")
         })
     }
 

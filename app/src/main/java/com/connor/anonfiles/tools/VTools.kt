@@ -1,6 +1,5 @@
 package com.connor.anonfiles.tools
 
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.view.View

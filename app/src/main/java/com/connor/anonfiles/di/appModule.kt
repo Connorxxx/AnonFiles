@@ -14,7 +14,7 @@ val appModule = module {
     single { AppDatabase.getDataBase(androidApplication() ) }
     single { get<AppDatabase>().fileDao() }
 
-    single { AnonNet }
+    single { AnonNet() }
 
     single { Repository(get(), get()) }
 
