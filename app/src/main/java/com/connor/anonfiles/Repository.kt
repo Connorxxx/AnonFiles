@@ -1,7 +1,7 @@
 package com.connor.anonfiles
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.connor.anonfiles.model.net.AnonNet
 import com.connor.anonfiles.model.room.FileDao
@@ -44,21 +44,13 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
 
     suspend fun delete(fileData: FileData) = fileDao.delete(fileData)
 
-    fun postFile(file: File): LiveData<FileData> {
-        val fileLiveData = MutableLiveData<FileData>()
-        ioScope.launch {
+    fun postFile(file: File): LiveData<FileData> = liveData(Dispatchers.IO) {
             val fileData = anonNet.postFile(file)
             fileData.id = fileDao.insertFile(fileData)
-            fileLiveData.postValue(fileData)
-        }
-        return fileLiveData
+            emit(fileData)
     }
 
-    fun downloadFile(url: String): LiveData<File> {
-        val dlLiveData = MutableLiveData<File>()
-        ioScope.launch {
-            dlLiveData.postValue(anonNet.downloadFile(url).await())
-        }
-        return dlLiveData
+    fun downloadFile(url: String): LiveData<File> = liveData(Dispatchers.IO) {
+            emit(anonNet.downloadFile(url).await())
     }
 }

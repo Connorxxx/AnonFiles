@@ -13,7 +13,7 @@ class AnonNet {
     }
 
     suspend fun postFile(file: File): FileData {
-        val data: FileModel = post(file)
+        val data: FileModel = post(file).await()
         val fileData = FileData(
             data.data.file.url.full,
             data.data.file.url.short,
@@ -28,6 +28,6 @@ class AnonNet {
     private suspend fun post(file: File) = coroutineScope {
         Post<FileModel>("upload") {
             param("file", file)
-        }.await()
+        }
     }
 }

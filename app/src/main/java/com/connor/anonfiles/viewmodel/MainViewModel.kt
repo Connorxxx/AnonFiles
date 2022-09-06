@@ -20,11 +20,11 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
 
     private lateinit var storageHelper: SimpleStorageHelper
 
-    private val fileLiveData = MutableLiveData<File>()
+    private val upFileLiveData = MutableLiveData<File>()
 
     private val dlFileLiveData = MutableLiveData<String>()
 
-    val fileData: LiveData<FileData> = Transformations.switchMap(fileLiveData) {
+    val upFileData: LiveData<FileData> = Transformations.switchMap(upFileLiveData) {
         repository.postFile(it)
     }
 
@@ -33,7 +33,7 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     }
 
     private fun getFileData(file: File) {
-        fileLiveData.postValue(file)
+        upFileLiveData.postValue(file)
     }
 
     fun downloadFile(url: String) {
@@ -76,7 +76,6 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
             inputStream?.source()?.buffer().use { buffer ->
                 buffer?.readAll(file.sink())
             }
-           // it.resume(file)
         }
         file
     }

@@ -69,8 +69,8 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             }
         }
         binding.rv.models = viewModel.getFileList()
-        viewModel.fileData.observe(this, Observer {
-            binding.rv.addModels(listOf(viewModel.fileData.value))
+        viewModel.upFileData.observe(this, Observer {
+            binding.rv.addModels(listOf(viewModel.upFileData.value))
             binding.rv.scrollToPosition(binding.rv.adapter!!.itemCount - 1)
         })
         viewModel.dlFileData.observe(this, Observer {
