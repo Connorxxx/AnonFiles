@@ -1,5 +1,6 @@
 package com.connor.anonfiles.di
 
+import androidx.lifecycle.SavedStateHandle
 import com.connor.anonfiles.Repository
 import com.connor.anonfiles.model.net.AnonNet
 import com.connor.anonfiles.model.room.AppDatabase
@@ -18,7 +19,9 @@ val appModule = module {
 
     single { Repository(get(), get()) }
 
-    viewModel { MainViewModel(get()) }
+    factory { SavedStateHandle() }
+
+    viewModel { MainViewModel(get(), get()) }
 
     factory { VTools() }
 }

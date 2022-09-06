@@ -2,6 +2,7 @@ package com.connor.anonfiles.model.room
 
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FileDao {
@@ -19,5 +20,5 @@ interface FileDao {
     suspend fun vacuumDb(supportSQLiteQuery: SupportSQLiteQuery): Long
 
     @Query("select * from FileData")
-    suspend fun loadAllFile(): List<FileData>
+    fun loadAllFile(): Flow<List<FileData>>
 }

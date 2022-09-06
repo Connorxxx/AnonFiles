@@ -16,7 +16,8 @@ import okio.sink
 import okio.source
 import java.io.File
 
-class MainViewModel(private val repository: Repository) : ViewModel() {
+class MainViewModel(private val repository: Repository,
+                    savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private lateinit var storageHelper: SimpleStorageHelper
 
@@ -40,15 +41,17 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         dlFileLiveData.value = url
     }
 
-    fun getFileDatabase() {
-        repository.getFileDatabase()
-    }
+    val getFileDatabase: LiveData<List<FileData>> = repository.getFileDatabase().asLiveData()
 
     fun deleteFileDatabase(fileId: String) {
         repository.deleteFileDatabase(fileId)
     }
 
-    fun getFileList() = repository.getFileList()
+//    fun getFileList() = repository.getFileList()
+
+//    fun getFileDatabase() {
+//        repository.getFileDatabase()
+//    }
 
     fun openFilePicker() {
         storageHelper.openFilePicker()
@@ -79,19 +82,6 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         }
         file
     }
-
-//    private suspend fun getFile(uri: Uri, name: String): File {
-//        val file = File(context.filesDir.path, name)
-//        withContext(Dispatchers.IO) {
-//            kotlin.runCatching {
-//                val inputStream = context.contentResolver.openInputStream(uri)
-//                inputStream?.source()?.buffer().use { buffer ->
-//                    buffer?.readAll(file.sink())
-//                }
-//            }
-//        }
-//        return file
-//    }
 
     override fun onCleared() {
         super.onCleared()

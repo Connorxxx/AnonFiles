@@ -23,14 +23,15 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
 
     fun getFileList() = fileDataList
 
-    fun getFileDatabase() {
-        ioScope.launch {
-            fileDataList.clear()
-            (fileDao.loadAllFile()).forEach {
-                fileDataList.addAll(listOf(it))
-            }
-        }
-    }
+    fun getFileDatabase() = fileDao.loadAllFile()
+//    {
+//        ioScope.launch {
+//            fileDataList.clear()
+//            (fileDao.loadAllFile()).forEach {
+//                fileDataList.addAll(listOf(it))
+//            }
+//        }
+//    }
 
     fun deleteFileDatabase(fileId: String) {
         ioScope.launch {

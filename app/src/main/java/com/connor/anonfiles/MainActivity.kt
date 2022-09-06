@@ -68,10 +68,13 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 viewModel.downloadFile(getModel<FileData>().fullUrl!!)
             }
         }
-        binding.rv.models = viewModel.getFileList()
+        viewModel.getFileDatabase.observe(this, Observer {
+            binding.rv.models = it
+        })
+        //binding.rv.models = viewModel.getFileList()
         viewModel.upFileData.observe(this, Observer {
-            binding.rv.addModels(listOf(viewModel.upFileData.value))
-            binding.rv.scrollToPosition(binding.rv.adapter!!.itemCount - 1)
+            //binding.rv.addModels(listOf(viewModel.upFileData.value))
+            binding.rv.smoothScrollToPosition(binding.rv.adapter!!.itemCount - 1)
         })
         viewModel.dlFileData.observe(this, Observer {
             tools.showSnackBar(binding.rv, "Download")
@@ -79,7 +82,7 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
     }
 
     override fun initData() {
-        viewModel.getFileDatabase()
+        //viewModel.getFileDatabase()
         viewModel.setupSimpleStorage(this)
     }
 
