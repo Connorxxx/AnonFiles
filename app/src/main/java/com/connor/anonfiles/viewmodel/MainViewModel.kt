@@ -33,6 +33,12 @@ class MainViewModel(private val repository: Repository,
         repository.downloadFile(it)
     }
 
+    val getFileDatabase = repository.getFileDatabase().asLiveData(Dispatchers.IO)
+
+    val getFileDatabaseByName = repository.getFileDatabaseByName().asLiveData(Dispatchers.IO)
+
+    val getFileDatabaseBySize = repository.getFileDatabaseBySize().asLiveData(Dispatchers.IO)
+
     private fun getFileData(file: File) {
         upFileLiveData.postValue(file)
     }
@@ -40,8 +46,6 @@ class MainViewModel(private val repository: Repository,
     fun downloadFile(url: String) {
         dlFileLiveData.value = url
     }
-
-    val getFileDatabase: LiveData<List<FileData>> = repository.getFileDatabase().asLiveData()
 
     fun deleteFileDatabase(fileId: String) {
         repository.deleteFileDatabase(fileId)

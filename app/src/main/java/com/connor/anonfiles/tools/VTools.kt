@@ -9,12 +9,6 @@ import com.google.android.material.snackbar.Snackbar
 
 class VTools {
 
-    fun showSnackBar(view: View, text: String): Snackbar {
-        val sbView =  Snackbar.make(view, text, Snackbar.LENGTH_LONG)
-        sbView.show()
-        return sbView
-    }
-
     fun openLink(link: String, context: Context, view: View) {
         val sourceUri = link.toUri()
         if (sourceUri.toString().startsWith("http")) {

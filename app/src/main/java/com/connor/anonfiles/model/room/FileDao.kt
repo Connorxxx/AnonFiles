@@ -21,4 +21,10 @@ interface FileDao {
 
     @Query("select * from FileData")
     fun loadAllFile(): Flow<List<FileData>>
+
+    @Query("select * from FileData ORDER BY fileName")
+    fun loadAllFileByName(): Flow<List<FileData>>
+
+    @Query("select * from FileData ORDER BY fileSize")
+    fun loadAllFileBySize(): Flow<List<FileData>>
 }

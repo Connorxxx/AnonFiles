@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">AnonFiles</string>
     <string name="download">Download</string>
+    <string name="sort_by">Sort by</string>
 </resources>

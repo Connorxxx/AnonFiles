@@ -1,6 +1,7 @@
 package com.connor.anonfiles
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.connor.anonfiles.model.net.AnonNet
@@ -24,6 +25,10 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
     fun getFileList() = fileDataList
 
     fun getFileDatabase() = fileDao.loadAllFile()
+
+    fun getFileDatabaseByName() = fileDao.loadAllFileByName()
+
+    fun getFileDatabaseBySize() = fileDao.loadAllFileBySize()
 //    {
 //        ioScope.launch {
 //            fileDataList.clear()
@@ -51,7 +56,7 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
             emit(fileData)
     }
 
-    fun downloadFile(url: String): LiveData<File> = liveData(Dispatchers.IO) {
+    fun downloadFile(url: String) = liveData(Dispatchers.IO) {
             emit(anonNet.downloadFile(url).await())
     }
 }
