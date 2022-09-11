@@ -2,4 +2,5 @@
     <string name="app_name">AnonFiles</string>
     <string name="download">Download</string>
     <string name="sort_by">Sort by</string>
+    <string name="search_in_list">Search in list</string>
 </resources>

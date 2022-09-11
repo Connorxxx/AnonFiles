@@ -1,6 +1,7 @@
 package com.connor.anonfiles.model.net
 
 import com.connor.anonfiles.model.room.FileData
+import com.drake.brv.annotaion.ItemOrientation
 import com.drake.net.Get
 import com.drake.net.Post
 import kotlinx.coroutines.coroutineScope
@@ -15,6 +16,7 @@ class AnonNet {
     suspend fun postFile(file: File): FileData {
         val data: FileModel = post(file).await()
         val fileData = FileData(
+            ItemOrientation.LEFT,
             data.data.file.url.full,
             data.data.file.url.short,
             data.data.file.metadata.id,

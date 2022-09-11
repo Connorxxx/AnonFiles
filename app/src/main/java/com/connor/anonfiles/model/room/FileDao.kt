@@ -2,6 +2,7 @@ package com.connor.anonfiles.model.room
 
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.drake.brv.annotaion.ItemOrientation
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -27,4 +28,8 @@ interface FileDao {
 
     @Query("select * from FileData ORDER BY fileSize")
     fun loadAllFileBySize(): Flow<List<FileData>>
+
+    @Transaction
+    @Query("SELECT * FROM FileData WHERE fileName LIKE '%' || :searchName || '%' ")
+    suspend fun queryFileName(searchName: String): List<FileData>
 }

@@ -3,12 +3,12 @@ package com.connor.anonfiles
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
+import android.content.Intent
 import android.view.View
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.connor.anonfiles.databinding.ActivityMainBinding
@@ -18,6 +18,7 @@ import com.connor.anonfiles.model.SortBy
 import com.connor.anonfiles.model.room.FileData
 import com.connor.anonfiles.tools.VTools
 import com.connor.anonfiles.tools.showSnackBar
+import com.connor.anonfiles.ui.SearchActivity
 import com.connor.anonfiles.viewmodel.MainViewModel
 import com.drake.brv.BindingAdapter
 import com.drake.brv.listener.DefaultItemTouchCallback
@@ -36,51 +37,36 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
     private val viewModel: MainViewModel by viewModel()
     private val tools: VTools by inject()
 
-    private val sortBy = SortBy()
-
-    private var dataSortBy: SortBy by serial()
-
     private var name: String by serialLazy("Name", "sortBy")
-
 
     override fun initView() {
         binding.v = this
-
         setSupportActionBar(binding.toolbarMain)
         initRV()
         when (name) {
-            "Name" -> viewModel.getFileDatabaseByName.observe(this, Observer {
-                binding.rv.models = it
-            })
-            "Last Add" -> viewModel.getFileDatabase.observe(this, Observer {
-                binding.rv.models = it
-            })
-            "Size" -> viewModel.getFileDatabaseBySize.observe(this, Observer {
-                binding.rv.models = it
-            })
+            "Name" -> getFileDatabaseByName()
+            "Last Add" -> getFileDatabase()
+            "Size" -> getFileDatabaseBySize()
         }
 
-        //binding.rv.models = viewModel.getFileList()
-        viewModel.upFileData.observe(this, Observer {
-            //binding.rv.addModels(listOf(viewModel.upFileData.value))
-            binding.rv.smoothScrollToPosition(binding.rv.adapter!!.itemCount - 1)
-        })
-        viewModel.dlFileData.observe(this, Observer {
-            binding.rv.showSnackBar("Download")
-        })
+        viewModel.upFileData.observe(this) {
+            binding.rv.smoothScrollToPosition(0)
+        }
+        viewModel.dlFileData.observe(this) {
+            binding.rv.showSnackBar("Downloading")
+        }
     }
 
     override fun initData() {
-        dataSortBy = sortBy
-        Log.d("initData", "initData: ${sortBy.sortBy}  or ${dataSortBy.sortBy}")
-        //viewModel.getFileDatabase()
         viewModel.setupSimpleStorage(this)
     }
 
     override fun onClick(v: View) {
         when (v) {
-            binding.fabUpload -> {
-                viewModel.openFilePicker()
+            binding.fabUpload -> viewModel.openFilePicker()
+            binding.cardSearch -> {
+                val intent = Intent(this, SearchActivity::class.java)
+                startActivity(intent)
             }
         }
     }
@@ -90,7 +76,11 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             addType<FileData>(R.layout.item_file_list)
             addType<SortBy>(R.layout.litem_file_list_header)
             onBind {
-                findView<TextView>(R.id.tv_sort_by)?.text = name
+                when(itemViewType) {
+                    R.layout.litem_file_list_header -> {
+                        findView<TextView>(R.id.tv_sort_by).text = name
+                    }
+                }
 
             }
             itemTouchHelper = ItemTouchHelper(object : DefaultItemTouchCallback() {
@@ -111,39 +101,26 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 )
                 bottomSheetDialog.setContentView(bindingSheet.root)
                 when (name) {
-                    "Name" -> bindingSheet.cardByName.setCardBackgroundColor(
-                        ContextCompat.getColor(this@MainActivity, R.color.fab_color))
-                    "Last Add" -> bindingSheet.cardByLastAdd.setCardBackgroundColor(
-                        ContextCompat.getColor(this@MainActivity, R.color.fab_color))
-                    "Size" -> bindingSheet.cardByFileSize.setCardBackgroundColor(
-                        ContextCompat.getColor(this@MainActivity, R.color.fab_color))
+                    "Name" -> setCardView(bindingSheet.cardByName)
+                    "Last Add" -> setCardView(bindingSheet.cardByLastAdd)
+                    "Size" -> setCardView(bindingSheet.cardByFileSize)
                 }
                 bindingSheet.cardByName.setOnClickListener {
                     name = "Name"
-                    viewModel.getFileDatabaseByName.observe(this@MainActivity, Observer {
-                        binding.rv.models = it
-                    })
+                    getFileDatabaseByName()
                     bottomSheetDialog.dismiss()
                 }
                 bindingSheet.cardByLastAdd.setOnClickListener {
                     name = "Last Add"
-                    viewModel.getFileDatabase.observe(this@MainActivity, Observer {
-                        binding.rv.models = it
-                    })
+                    getFileDatabase()
                     bottomSheetDialog.dismiss()
                 }
                 bindingSheet.cardByFileSize.setOnClickListener {
                     name = "Size"
-                    viewModel.getFileDatabaseBySize.observe(this@MainActivity, Observer {
-                        binding.rv.models = it
-                    })
+                    getFileDatabaseBySize()
                     bottomSheetDialog.dismiss()
                 }
-
                 bottomSheetDialog.show()
-//                viewModel.getFileDatabaseByName.observe(this@MainActivity, Observer {
-//                    binding.rv.models = it
-//                })
             }
 
             R.id.card_fiie_list.onClick {
@@ -179,5 +156,28 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 if (dy > 0) binding.fabUpload.hide() else binding.fabUpload.show()
             }
         })
+    }
+
+    private fun setCardView(cardView: CardView) {
+        cardView.setCardBackgroundColor(
+            ContextCompat.getColor(this, R.color.fab_color))
+    }
+
+    private fun getFileDatabaseByName() {
+        viewModel.getFileDatabaseByName.observe(this) {
+            binding.rv.models = it
+        }
+    }
+
+    private fun getFileDatabase() {
+        viewModel.getFileDatabase.observe(this) {
+            binding.rv.models = it
+        }
+    }
+
+    private fun getFileDatabaseBySize() {
+        viewModel.getFileDatabaseBySize.observe(this) {
+            binding.rv.models = it
+        }
     }
 }

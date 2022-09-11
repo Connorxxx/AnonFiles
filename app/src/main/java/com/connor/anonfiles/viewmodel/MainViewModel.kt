@@ -9,6 +9,7 @@ import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
 import com.connor.anonfiles.model.room.FileData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.buffer
@@ -16,14 +17,15 @@ import okio.sink
 import okio.source
 import java.io.File
 
-class MainViewModel(private val repository: Repository,
-                    savedStateHandle: SavedStateHandle) : ViewModel() {
+class MainViewModel(private val repository: Repository) : ViewModel() {
 
     private lateinit var storageHelper: SimpleStorageHelper
 
     private val upFileLiveData = MutableLiveData<File>()
 
     private val dlFileLiveData = MutableLiveData<String>()
+
+    private val fileQueryNameLiveData = MutableLiveData<String>()
 
     val upFileData: LiveData<FileData> = Transformations.switchMap(upFileLiveData) {
         repository.postFile(it)
@@ -39,8 +41,16 @@ class MainViewModel(private val repository: Repository,
 
     val getFileDatabaseBySize = repository.getFileDatabaseBySize().asLiveData(Dispatchers.IO)
 
+    val getFileDatabaseByQueryName = Transformations.switchMap(fileQueryNameLiveData) {
+        repository.getFileDatabaseByQueryName(it)
+    }
+
     private fun getFileData(file: File) {
         upFileLiveData.postValue(file)
+    }
+
+    fun queryName(fileName: String) {
+        fileQueryNameLiveData.value = fileName
     }
 
     fun downloadFile(url: String) {

@@ -19,9 +19,7 @@ val appModule = module {
 
     single { Repository(get(), get()) }
 
-    factory { SavedStateHandle() }
-
-    viewModel { MainViewModel(get(), get()) }
+    viewModel { MainViewModel(get()) }
 
     factory { VTools() }
 }
