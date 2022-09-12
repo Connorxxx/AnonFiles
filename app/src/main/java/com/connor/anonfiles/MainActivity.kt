@@ -3,7 +3,7 @@ package com.connor.anonfiles
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -34,6 +34,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main) {
 
+    private val TAG = "MainActivity"
+
     private val viewModel: MainViewModel by viewModel()
     private val tools: VTools by inject()
 
@@ -48,8 +50,8 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             "Last Add" -> getFileDatabase()
             "Size" -> getFileDatabaseBySize()
         }
-
         viewModel.upFileData.observe(this) {
+            binding.rv.showSnackBar("Done")
             binding.rv.smoothScrollToPosition(0)
         }
         viewModel.dlFileData.observe(this) {
@@ -64,10 +66,7 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
     override fun onClick(v: View) {
         when (v) {
             binding.fabUpload -> viewModel.openFilePicker()
-            binding.cardSearch -> {
-                val intent = Intent(this, SearchActivity::class.java)
-                startActivity(intent)
-            }
+            binding.cardSearch -> tools.startActivity<SearchActivity>(this) {}
         }
     }
 
@@ -77,15 +76,17 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             addType<SortBy>(R.layout.litem_file_list_header)
             onBind {
                 when(itemViewType) {
-                    R.layout.litem_file_list_header -> {
+                    R.layout.litem_file_list_header ->
                         findView<TextView>(R.id.tv_sort_by).text = name
-                    }
                 }
-
             }
             itemTouchHelper = ItemTouchHelper(object : DefaultItemTouchCallback() {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    super.onSwiped(viewHolder, direction)
+                    //super.onSwiped(viewHolder, direction)
+                    val adapter = viewHolder.bindingAdapter as? BindingAdapter
+                    val layoutPosition = viewHolder.layoutPosition
+                    adapter?.notifyItemRemoved(layoutPosition)
+                    (adapter?.models as ArrayList).removeAt(layoutPosition - 1)
                     val fileId = (viewHolder as BindingAdapter.BindingViewHolder)
                         .getModel<FileData>().fileID
                     viewModel.deleteFileDatabase(fileId!!)
@@ -122,7 +123,6 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 }
                 bottomSheetDialog.show()
             }
-
             R.id.card_fiie_list.onClick {
                 val alertDialog = MaterialAlertDialogBuilder(this@MainActivity)
                 val binding = DataBindingUtil.inflate<DialogDetailsBinding>(
@@ -138,7 +138,6 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             R.id.img_share.onClick {
                 tools.shareLink(getModel<FileData>().shortUrl!!, this@MainActivity, binding.rv)
             }
-
             R.id.btn_copy.onClick {
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip: ClipData = ClipData.newPlainText("link", getModel<FileData>().shortUrl!!)

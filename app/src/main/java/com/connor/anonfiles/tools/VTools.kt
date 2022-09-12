@@ -9,6 +9,12 @@ import com.google.android.material.snackbar.Snackbar
 
 class VTools {
 
+    inline fun <reified T> startActivity(context: Context, block: Intent.() -> Unit) {
+        val intent = Intent(context, T::class.java)
+        intent.block()
+        context.startActivity(intent)
+    }
+
     fun openLink(link: String, context: Context, view: View) {
         val sourceUri = link.toUri()
         if (sourceUri.toString().startsWith("http")) {

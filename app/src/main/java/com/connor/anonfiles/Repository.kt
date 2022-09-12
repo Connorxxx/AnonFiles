@@ -1,22 +1,15 @@
 package com.connor.anonfiles
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.liveData
 import com.connor.anonfiles.model.net.AnonNet
 import com.connor.anonfiles.model.room.FileDao
 import com.connor.anonfiles.model.room.FileData
 import com.drake.brv.annotaion.ItemOrientation
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import java.io.File
 
 class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
-
-    val job = Job()
-    private val ioScope = CoroutineScope(Dispatchers.IO + job)
 
     fun getFileDatabase() = fileDao.loadAllFile()
 
@@ -32,10 +25,8 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
         emit(test)
     }
 
-    fun deleteFileDatabase(fileId: String) {
-        ioScope.launch {
+    suspend fun deleteFileDatabase(fileId: String) {
             fileDao.deleteFile(fileId)
-        }
     }
 
     fun postFile(file: File): LiveData<FileData> = liveData(Dispatchers.IO) {

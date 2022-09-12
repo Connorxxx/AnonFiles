@@ -1,6 +1,7 @@
 package com.connor.anonfiles.viewmodel
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.*
 import com.anggrayudi.storage.SimpleStorageHelper
@@ -58,7 +59,9 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     }
 
     fun deleteFileDatabase(fileId: String) {
-        repository.deleteFileDatabase(fileId)
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteFileDatabase(fileId)
+        }
     }
 
 //    fun getFileList() = repository.getFileList()
@@ -95,10 +98,5 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
             }
         }
         file
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        repository.job.cancel()
     }
 }
