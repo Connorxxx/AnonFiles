@@ -28,7 +28,7 @@
                 android:background="?attr/colorPrimary"
                 android:minHeight="?attr/actionBarSize"
                 android:theme="?attr/actionBarTheme"
-                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed|snap|snapMargins"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight.ActionBar">
 
 

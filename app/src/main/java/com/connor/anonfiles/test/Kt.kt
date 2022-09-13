@@ -17,6 +17,10 @@ fun main() {
     handleSimpleData(data = data)
     val studentData = data.get()
 
+    Test.test {
+
+    }
+
 }
 
 fun handleSimpleData(data: SimpleData<Person>) {

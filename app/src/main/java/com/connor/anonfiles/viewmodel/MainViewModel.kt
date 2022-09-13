@@ -10,6 +10,7 @@ import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
 import com.connor.anonfiles.model.room.FileData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,12 +65,6 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-//    fun getFileList() = repository.getFileList()
-
-//    fun getFileDatabase() {
-//        repository.getFileDatabase()
-//    }
-
     fun openFilePicker() {
         storageHelper.openFilePicker()
     }
@@ -89,7 +84,7 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     private suspend fun getFile(
         uri: Uri,
         name: String,
-    ) = withContext(Dispatchers.IO) {
+    ) = coroutineScope {
         val file = File(context.filesDir.path, name)
         kotlin.runCatching {
             val inputStream = context.contentResolver.openInputStream(uri)
