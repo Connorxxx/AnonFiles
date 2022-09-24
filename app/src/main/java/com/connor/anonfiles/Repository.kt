@@ -18,11 +18,11 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
     fun getFileDatabaseBySize() = fileDao.loadAllFileBySize()
 
     fun getFileDatabaseByQueryName(searchName: String) = liveData(Dispatchers.IO) {
-        val test = fileDao.queryFileName(searchName)
-        test.forEach {
+        val searchList = fileDao.queryFileName(searchName)
+        searchList.forEach {
             it.itemOrientationSwipe = ItemOrientation.NONE
         }
-        emit(test)
+        emit(searchList)
     }
 
     suspend fun deleteFileDatabase(fileId: String) {
@@ -36,6 +36,9 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
     }
 
     fun downloadFile(url: String) = liveData(Dispatchers.IO) {
+        kotlin.runCatching {
             emit(anonNet.downloadFile(url).await())
+        }.exceptionOrNull()
+
     }
 }

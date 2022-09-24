@@ -8,8 +8,9 @@ public class JavaTest {
 
     public static void main(String[] args) {
 
-        Test.INSTANCE.test( () -> {
+        Test.INSTANCE.test( (fileData) -> {
             //channel
+            fileData.getFileID();
             return null;
         });
 

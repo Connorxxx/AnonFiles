@@ -1,6 +1,6 @@
 package com.connor.anonfiles.di
 
-import androidx.lifecycle.SavedStateHandle
+import com.anggrayudi.storage.SimpleStorageHelper
 import com.connor.anonfiles.Repository
 import com.connor.anonfiles.model.net.AnonNet
 import com.connor.anonfiles.model.room.AppDatabase
@@ -22,4 +22,6 @@ val appModule = module {
     viewModel { MainViewModel(get()) }
 
     factory { VTools() }
+
+    factory { params -> SimpleStorageHelper(activity = params.get()) }
 }

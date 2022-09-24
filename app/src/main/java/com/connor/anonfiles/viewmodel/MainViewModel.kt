@@ -3,6 +3,7 @@ package com.connor.anonfiles.viewmodel
 import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.core.net.toFile
 import androidx.lifecycle.*
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.fullName
@@ -21,7 +22,8 @@ import java.io.File
 
 class MainViewModel(private val repository: Repository) : ViewModel() {
 
-    private lateinit var storageHelper: SimpleStorageHelper
+   // private lateinit var storageHelper: SimpleStorageHelper
+
 
     private val upFileLiveData = MutableLiveData<File>()
 
@@ -65,19 +67,13 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun openFilePicker() {
-        storageHelper.openFilePicker()
-    }
-
-    fun setupSimpleStorage(activity: ComponentActivity) {
-        storageHelper = SimpleStorageHelper(activity)
+    fun setupSimpleStorage(storageHelper: SimpleStorageHelper) {
         storageHelper.onFileSelected = { _, files ->
             val documentFile = files.first()
             viewModelScope.launch(Dispatchers.IO) {
                 val file = getFile(documentFile.uri, documentFile.fullName)
                 getFileData(file)
             }
-
         }
     }
 

@@ -18,7 +18,7 @@ fun main() {
     val studentData = data.get()
 
     Test.test {
-
+        it.shortUrl
     }
 
 }

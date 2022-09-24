@@ -1,10 +1,20 @@
 package com.connor.anonfiles.tools
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.view.LayoutInflater
 import android.view.View
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
+import androidx.databinding.DataBindingUtil
+import com.connor.anonfiles.R
+import com.connor.anonfiles.databinding.DialogDetailsBinding
+import com.connor.anonfiles.model.room.FileData
+import com.drake.engine.utils.DeviceUtils.getModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 
 class VTools {
@@ -13,6 +23,19 @@ class VTools {
         val intent = Intent(context, T::class.java)
         intent.block()
         context.startActivity(intent)
+    }
+
+    inline fun showDialog(context: Context, layoutInflater: LayoutInflater, block: (binding: DialogDetailsBinding) -> Unit) {
+        val alertDialog = MaterialAlertDialogBuilder(context)
+        val binding = DataBindingUtil.inflate<DialogDetailsBinding>(
+            layoutInflater,
+            R.layout.dialog_details,
+            null,
+            false
+        )
+        block(binding)
+        alertDialog.setView(binding.root)
+        alertDialog.show()
     }
 
     fun openLink(link: String, context: Context, view: View) {

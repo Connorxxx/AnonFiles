@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.anggrayudi.storage.SimpleStorageHelper
 import com.connor.anonfiles.databinding.ActivityMainBinding
 import com.connor.anonfiles.databinding.DialogBottomSheetBinding
 import com.connor.anonfiles.databinding.DialogDetailsBinding
@@ -31,6 +32,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main) {
 
@@ -38,6 +40,10 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
 
     private val viewModel: MainViewModel by viewModel()
     private val tools: VTools by inject()
+
+    private val storageHelper by inject<SimpleStorageHelper> {
+        parametersOf(this)
+    }
 
     private var name: String by serialLazy("Name", "sortBy")
 
@@ -60,12 +66,12 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
     }
 
     override fun initData() {
-        viewModel.setupSimpleStorage(this)
+        viewModel.setupSimpleStorage(storageHelper)
     }
 
     override fun onClick(v: View) {
         when (v) {
-            binding.fabUpload -> viewModel.openFilePicker()
+            binding.fabUpload -> storageHelper.openFilePicker()
             binding.cardSearch -> tools.startActivity<SearchActivity>(this) {}
         }
     }
@@ -124,16 +130,9 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 bottomSheetDialog.show()
             }
             R.id.card_fiie_list.onClick {
-                val alertDialog = MaterialAlertDialogBuilder(this@MainActivity)
-                val binding = DataBindingUtil.inflate<DialogDetailsBinding>(
-                    layoutInflater,
-                    R.layout.dialog_details,
-                    null,
-                    false
-                )
-                binding.m = getModel()
-                alertDialog.setView(binding.root)
-                alertDialog.show()
+                tools.showDialog(this@MainActivity, layoutInflater) {
+                    it.m = getModel()
+                }
             }
             R.id.img_share.onClick {
                 tools.shareLink(getModel<FileData>().shortUrl!!, this@MainActivity, binding.rv)

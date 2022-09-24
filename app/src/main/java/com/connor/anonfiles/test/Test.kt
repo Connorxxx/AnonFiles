@@ -5,9 +5,9 @@ import com.drake.channel.receiveEventHandler
 
 object Test {
 
-    fun test(block: () -> Unit) {
+    fun test(block: (FileData) -> Unit) {
         receiveEventHandler<FileData>("tag") {
-            block()
+            block(it)
         }
     }
 
