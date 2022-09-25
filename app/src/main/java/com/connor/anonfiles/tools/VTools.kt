@@ -25,7 +25,19 @@ class VTools {
         context.startActivity(intent)
     }
 
-    inline fun showDialog(context: Context, layoutInflater: LayoutInflater, block: (binding: DialogDetailsBinding) -> Unit) {
+    inline fun <reified T> startService(context: Context, block: Intent.() -> Unit) {
+        val intent = Intent(context, T::class.java)
+        intent.block()
+        context.startService(intent)
+    }
+
+    inline fun <reified T> stopService(context: Context, block: Intent.() -> Unit) {
+        val stopService = Intent(context, T::class.java)
+        stopService.block()
+        context.stopService(stopService)
+    }
+
+    inline fun showAlertDialog(context: Context, layoutInflater: LayoutInflater, block: (binding: DialogDetailsBinding) -> Unit) {
         val alertDialog = MaterialAlertDialogBuilder(context)
         val binding = DataBindingUtil.inflate<DialogDetailsBinding>(
             layoutInflater,

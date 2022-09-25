@@ -5,8 +5,10 @@ import androidx.lifecycle.liveData
 import com.connor.anonfiles.model.net.AnonNet
 import com.connor.anonfiles.model.room.FileDao
 import com.connor.anonfiles.model.room.FileData
+import com.connor.anonfiles.tools.showToast
 import com.drake.brv.annotaion.ItemOrientation
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
@@ -38,7 +40,11 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
     fun downloadFile(url: String) = liveData(Dispatchers.IO) {
         kotlin.runCatching {
             emit(anonNet.downloadFile(url).await())
-        }.exceptionOrNull()
+        }.onFailure {
+            withContext(Dispatchers.Main) {
+                "The file you are looking for does not exist!".showToast()
+            }
+        }
 
     }
 }

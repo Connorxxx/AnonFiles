@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.core.net.toFile
 import androidx.lifecycle.*
 import com.anggrayudi.storage.SimpleStorageHelper
+import com.anggrayudi.storage.file.copyFileTo
 import com.anggrayudi.storage.file.fullName
 import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository

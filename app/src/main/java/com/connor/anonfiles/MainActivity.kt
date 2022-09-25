@@ -3,18 +3,17 @@ package com.connor.anonfiles
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.connor.anonfiles.databinding.ActivityMainBinding
 import com.connor.anonfiles.databinding.DialogBottomSheetBinding
-import com.connor.anonfiles.databinding.DialogDetailsBinding
 import com.connor.anonfiles.model.SortBy
 import com.connor.anonfiles.model.room.FileData
 import com.connor.anonfiles.tools.VTools
@@ -29,7 +28,6 @@ import com.drake.brv.utils.setup
 import com.drake.engine.base.EngineActivity
 import com.drake.serialize.serialize.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -130,7 +128,7 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 bottomSheetDialog.show()
             }
             R.id.card_fiie_list.onClick {
-                tools.showDialog(this@MainActivity, layoutInflater) {
+                tools.showAlertDialog(this@MainActivity, layoutInflater) {
                     it.m = getModel()
                 }
             }

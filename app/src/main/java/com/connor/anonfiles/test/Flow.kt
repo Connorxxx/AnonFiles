@@ -28,7 +28,7 @@ fun numbers(): Flow<Int> = flow {
 
 
 fun main() = runBlocking {
-//    simple().collect() { println(it) }
+    simple().collect() { println(it) }
 
 //    (1..3).asFlow().collect { println(it) }
 
@@ -42,7 +42,7 @@ fun main() = runBlocking {
 //            emit(performRequest(request))
 //        }.collect() { println(it) }
 
-    numbers()
-        .take(2)
-        .collect() { println(it) }
+//    numbers()
+//        .take(2)
+//        .collect() { println(it) }
 }

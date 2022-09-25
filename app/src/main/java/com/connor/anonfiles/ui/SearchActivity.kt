@@ -3,8 +3,6 @@ package com.connor.anonfiles.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -15,12 +13,9 @@ import com.connor.anonfiles.model.room.FileData
 import com.connor.anonfiles.tools.VTools
 import com.connor.anonfiles.tools.showSnackBar
 import com.connor.anonfiles.viewmodel.MainViewModel
-import com.drake.brv.annotaion.ItemOrientation
 import com.drake.brv.utils.models
 import com.drake.brv.utils.setup
-import com.drake.engine.base.EngineActivity
 import com.drake.engine.base.EngineToolbarActivity
-import com.drake.engine.databinding.bind
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -65,7 +60,7 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
         binding.rvSearch.setup {
             addType<FileData>(R.layout.item_file_list)
             R.id.card_fiie_list.onClick {
-                tools.showDialog(this@SearchActivity, layoutInflater) {
+                tools.showAlertDialog(this@SearchActivity, layoutInflater) {
                     it.m = getModel()
                 }
             }
