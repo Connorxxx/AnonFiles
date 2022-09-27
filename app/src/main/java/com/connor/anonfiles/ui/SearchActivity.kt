@@ -47,7 +47,7 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
         viewModel.getFileDatabaseByQueryName.observe(this) {
             binding.rvSearch.models = it
         }
-        viewModel.dlFileData.observe(this) {
+        viewModel.dlLiveData.observe(this) {
             binding.rvSearch.showSnackBar("Downloading")
         }
     }

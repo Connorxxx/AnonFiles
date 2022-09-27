@@ -1,20 +1,15 @@
 package com.connor.anonfiles.viewmodel
 
 import android.net.Uri
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.core.net.toFile
 import androidx.lifecycle.*
 import com.anggrayudi.storage.SimpleStorageHelper
-import com.anggrayudi.storage.file.copyFileTo
 import com.anggrayudi.storage.file.fullName
 import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
-import com.connor.anonfiles.model.room.FileData
+import com.connor.anonfiles.tools.showToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.buffer
@@ -37,7 +32,14 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     }
 
     val dlLiveData = dlFileLiveData.switchMap {
-        liveData(Dispatchers.IO) { emit(repository.downloadFile(it)) }
+        liveData(Dispatchers.IO) {
+            kotlin.runCatching { emit(repository.downloadFile(it)) }.onFailure {
+                withContext(Dispatchers.Main) {
+                    "The file you are looking for does not exist!".showToast()
+                }
+            }
+
+        }
     }
 
     val getFileDatabase = repository.getFileDatabase().asLiveData(Dispatchers.IO)
