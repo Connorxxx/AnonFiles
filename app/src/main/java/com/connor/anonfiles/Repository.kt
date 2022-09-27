@@ -31,20 +31,25 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
             fileDao.deleteFile(fileId)
     }
 
-    fun postFile(file: File): LiveData<FileData> = liveData(Dispatchers.IO) {
-            val fileData = anonNet.postFile(file)
-            fileData.id = fileDao.insertFile(fileData)
-            emit(fileData)
+    suspend fun postFile(file: File): FileData {
+        val fileData = anonNet.postFile(file)
+        fileData.id = fileDao.insertFile(fileData)
+        return fileData
     }
+//        liveData(Dispatchers.IO) {
+//            val fileData = anonNet.postFile(file)
+//            fileData.id = fileDao.insertFile(fileData)
+//            emit(fileData)
+//    }
 
-    fun downloadFile(url: String) = liveData(Dispatchers.IO) {
-        kotlin.runCatching {
-            emit(anonNet.downloadFile(url).await())
-        }.onFailure {
-            withContext(Dispatchers.Main) {
-                "The file you are looking for does not exist!".showToast()
-            }
-        }
-
-    }
+    suspend fun downloadFile(url: String) = anonNet.downloadFile(url).await()
+//        liveData(Dispatchers.IO) {
+//        kotlin.runCatching {
+//            emit(anonNet.downloadFile(url).await())
+//        }.onFailure {
+//            withContext(Dispatchers.Main) {
+//                "The file you are looking for does not exist!".showToast()
+//            }
+//        }
+//    }
 }

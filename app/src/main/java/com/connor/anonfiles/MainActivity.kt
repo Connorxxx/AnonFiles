@@ -58,7 +58,7 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             binding.rv.showSnackBar("Done")
             binding.rv.smoothScrollToPosition(0)
         }
-        viewModel.dlFileData.observe(this) {
+        viewModel.dlLiveData.observe(this) {
             binding.rv.showSnackBar("Downloading")
         }
     }

@@ -14,6 +14,7 @@ import com.connor.anonfiles.model.room.FileData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.buffer
@@ -23,21 +24,20 @@ import java.io.File
 
 class MainViewModel(private val repository: Repository) : ViewModel() {
 
-   // private lateinit var storageHelper: SimpleStorageHelper
-
-
     private val upFileLiveData = MutableLiveData<File>()
 
     private val dlFileLiveData = MutableLiveData<String>()
 
     private val fileQueryNameLiveData = MutableLiveData<String>()
 
-    val upFileData: LiveData<FileData> = Transformations.switchMap(upFileLiveData) {
-        repository.postFile(it)
+    private val dlStatusFlow = MutableStateFlow("")
+
+    val upFileData = upFileLiveData.switchMap {
+        liveData(Dispatchers.IO) { emit(repository.postFile(it)) }
     }
 
-    val dlFileData: LiveData<File> = Transformations.switchMap(dlFileLiveData) {
-        repository.downloadFile(it)
+    val dlLiveData = dlFileLiveData.switchMap {
+        liveData(Dispatchers.IO) { emit(repository.downloadFile(it)) }
     }
 
     val getFileDatabase = repository.getFileDatabase().asLiveData(Dispatchers.IO)
@@ -60,6 +60,7 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
 
     fun downloadFile(url: String) {
         dlFileLiveData.value = url
+        dlStatusFlow.value = url
     }
 
     fun deleteFileDatabase(fileId: String) {
