@@ -2,15 +2,16 @@ package com.connor.anonfiles.viewmodel
 
 import android.net.Uri
 import androidx.lifecycle.*
-import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.fullName
 import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
-import com.connor.anonfiles.tools.showSnackBar
 import com.connor.anonfiles.tools.showToast
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.sink
 import okio.source
@@ -98,18 +99,16 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun setupSimpleStorage(storageHelper: SimpleStorageHelper, rv: RecyclerView) {
+    fun setupSimpleStorage(storageHelper: SimpleStorageHelper, block: () -> Unit) {
         storageHelper.onFileSelected = { _, files ->
             val documentFile = files.first()
             viewModelScope.launch(Dispatchers.IO) {
                 val file = getFile(documentFile.uri, documentFile.fullName)
                 upFlow(file).collect {
                     withContext(Dispatchers.Main) {
-                        rv.showSnackBar("Uploaded")
-                        rv.smoothScrollToPosition(0)
+                        block()
                     }
                 }
-                //getFileData(file)
             }
         }
     }

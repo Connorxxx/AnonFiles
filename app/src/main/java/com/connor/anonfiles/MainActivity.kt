@@ -3,16 +3,11 @@ package com.connor.anonfiles
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
@@ -32,11 +27,6 @@ import com.drake.brv.utils.setup
 import com.drake.engine.base.EngineActivity
 import com.drake.serialize.serialize.serialLazy
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -73,7 +63,10 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
     }
 
     override fun initData() {
-        viewModel.setupSimpleStorage(storageHelper, binding.rv)
+        viewModel.setupSimpleStorage(storageHelper) {
+            binding.rv.showSnackBar("Done")
+            binding.rv.smoothScrollToPosition(0)
+        }
     }
 
     override fun onClick(v: View) {

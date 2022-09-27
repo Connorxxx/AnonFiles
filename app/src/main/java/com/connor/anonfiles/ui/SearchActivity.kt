@@ -47,9 +47,6 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
         viewModel.getFileDatabaseByQueryName.observe(this) {
             binding.rvSearch.models = it
         }
-//        viewModel.dlLiveData.observe(this) {
-//            binding.rvSearch.showSnackBar("Downloading")
-//        }
     }
 
     override fun initData() {
@@ -74,7 +71,9 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
                 binding.rvSearch.showSnackBar("Copy Success")
             }
             R.id.btn_download.onClick {
-               // viewModel.downloadFile(getModel<FileData>().fullUrl!!)
+               viewModel.dlFile(getModel<FileData>().fullUrl!!) {
+                   binding.rvSearch.showSnackBar("Downloading")
+               }
                 Log.d("TAG", "initRV: ${getModel<FileData>().fullUrl!!}")
             }
         }
