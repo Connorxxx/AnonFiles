@@ -3,12 +3,16 @@ package com.connor.anonfiles
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
@@ -26,8 +30,13 @@ import com.drake.brv.utils.bindingAdapter
 import com.drake.brv.utils.models
 import com.drake.brv.utils.setup
 import com.drake.engine.base.EngineActivity
-import com.drake.serialize.serialize.*
+import com.drake.serialize.serialize.serialLazy
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -54,17 +63,17 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             "Last Add" -> getFileDatabase()
             "Size" -> getFileDatabaseBySize()
         }
-        viewModel.upFileData.observe(this) {
-            binding.rv.showSnackBar("Done")
-            binding.rv.smoothScrollToPosition(0)
-        }
-        viewModel.dlLiveData.observe(this) {
-            binding.rv.showSnackBar("Downloading")
-        }
+//        viewModel.upFileData.observe(this) {
+//            binding.rv.showSnackBar("Done")
+//            binding.rv.smoothScrollToPosition(0)
+//        }
+//        viewModel.dlLiveData.observe(this) {
+//            binding.rv.showSnackBar("Downloading")
+//        }
     }
 
     override fun initData() {
-        viewModel.setupSimpleStorage(storageHelper)
+        viewModel.setupSimpleStorage(storageHelper, binding.rv)
     }
 
     override fun onClick(v: View) {
@@ -79,7 +88,7 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             addType<FileData>(R.layout.item_file_list)
             addType<SortBy>(R.layout.litem_file_list_header)
             onBind {
-                when(itemViewType) {
+                when (itemViewType) {
                     R.layout.litem_file_list_header ->
                         findView<TextView>(R.id.tv_sort_by).text = name
                 }
@@ -142,7 +151,9 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 binding.rv.showSnackBar("Copy Success")
             }
             R.id.btn_download.onClick {
-                viewModel.downloadFile(getModel<FileData>().fullUrl!!)
+                viewModel.dlFile(getModel<FileData>().fullUrl!!) {
+                    binding.rv.showSnackBar("Downloading")
+                }
             }
         }
         binding.rv.bindingAdapter.addHeader(SortBy(), animation = true)
@@ -156,7 +167,8 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
 
     private fun setCardView(cardView: CardView) {
         cardView.setCardBackgroundColor(
-            ContextCompat.getColor(this, R.color.fab_color))
+            ContextCompat.getColor(this, R.color.fab_color)
+        )
     }
 
     private fun getFileDatabaseByName() {

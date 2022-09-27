@@ -2,16 +2,15 @@ package com.connor.anonfiles.viewmodel
 
 import android.net.Uri
 import androidx.lifecycle.*
+import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.fullName
 import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
+import com.connor.anonfiles.tools.showSnackBar
 import com.connor.anonfiles.tools.showToast
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import okio.buffer
 import okio.sink
 import okio.source
@@ -25,8 +24,6 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
 
     private val fileQueryNameLiveData = MutableLiveData<String>()
 
-    private val dlStatusFlow = MutableStateFlow("")
-
     val upFileData = upFileLiveData.switchMap {
         liveData(Dispatchers.IO) { emit(repository.postFile(it)) }
     }
@@ -38,7 +35,38 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
                     "The file you are looking for does not exist!".showToast()
                 }
             }
+        }
+    }
 
+    private fun upFlow(file: File) = flow {
+        emit(file)
+    }.map {
+        repository.postFile(file)
+    }.flowOn(Dispatchers.IO)
+        .shareIn(
+            viewModelScope,
+            replay = 0,
+            started = SharingStarted.WhileSubscribed(5000)
+        )
+
+    fun dlFlow(url: String) = flow {
+        emit(url)
+    }.map {
+        repository.downloadFile(it)
+    }.flowOn(Dispatchers.IO)
+        .catch {
+            "The file you are looking for does not exist!".showToast()
+        }.shareIn(
+            viewModelScope,
+            replay = 0,
+            started = SharingStarted.WhileSubscribed(5000)
+        )
+
+    inline fun dlFile(url: String, crossinline block: () -> Unit) {
+        viewModelScope.launch {
+            dlFlow(url).collect {
+                block()
+            }
         }
     }
 
@@ -62,7 +90,6 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
 
     fun downloadFile(url: String) {
         dlFileLiveData.value = url
-        dlStatusFlow.value = url
     }
 
     fun deleteFileDatabase(fileId: String) {
@@ -71,12 +98,18 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun setupSimpleStorage(storageHelper: SimpleStorageHelper) {
+    fun setupSimpleStorage(storageHelper: SimpleStorageHelper, rv: RecyclerView) {
         storageHelper.onFileSelected = { _, files ->
             val documentFile = files.first()
             viewModelScope.launch(Dispatchers.IO) {
                 val file = getFile(documentFile.uri, documentFile.fullName)
-                getFileData(file)
+                upFlow(file).collect {
+                    withContext(Dispatchers.Main) {
+                        rv.showSnackBar("Uploaded")
+                        rv.smoothScrollToPosition(0)
+                    }
+                }
+                //getFileData(file)
             }
         }
     }
