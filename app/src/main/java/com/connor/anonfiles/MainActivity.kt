@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
@@ -27,6 +28,7 @@ import com.drake.brv.utils.setup
 import com.drake.engine.base.EngineActivity
 import com.drake.serialize.serialize.serialLazy
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -53,13 +55,6 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
             "Last Add" -> getFileDatabase()
             "Size" -> getFileDatabaseBySize()
         }
-//        viewModel.upFileData.observe(this) {
-//            binding.rv.showSnackBar("Done")
-//            binding.rv.smoothScrollToPosition(0)
-//        }
-//        viewModel.dlLiveData.observe(this) {
-//            binding.rv.showSnackBar("Downloading")
-//        }
     }
 
     override fun initData() {
@@ -165,20 +160,26 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
     }
 
     private fun getFileDatabaseByName() {
-        viewModel.getFileDatabaseByName.observe(this) {
-            binding.rv.models = it
+        lifecycleScope.launch {
+            viewModel.getFileDatabaseByName.collect {
+                binding.rv.models = it
+            }
         }
     }
 
     private fun getFileDatabase() {
-        viewModel.getFileDatabase.observe(this) {
-            binding.rv.models = it
+        lifecycleScope.launch {
+            viewModel.getFileDatabase.collect {
+                binding.rv.models = it
+            }
         }
     }
 
     private fun getFileDatabaseBySize() {
-        viewModel.getFileDatabaseBySize.observe(this) {
-            binding.rv.models = it
+        lifecycleScope.launch {
+            viewModel.getFileDatabaseBySize.collect {
+                binding.rv.models = it
+            }
         }
     }
 }

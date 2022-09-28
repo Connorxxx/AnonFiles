@@ -7,15 +7,20 @@ import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.lifecycle.lifecycleScope
 import com.connor.anonfiles.R
 import com.connor.anonfiles.databinding.ActivitySearchBinding
 import com.connor.anonfiles.model.room.FileData
 import com.connor.anonfiles.tools.VTools
 import com.connor.anonfiles.tools.showSnackBar
 import com.connor.anonfiles.viewmodel.MainViewModel
+import com.drake.brv.annotaion.ItemOrientation
 import com.drake.brv.utils.models
 import com.drake.brv.utils.setup
 import com.drake.engine.base.EngineToolbarActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -24,7 +29,7 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
     private val viewModel: MainViewModel by viewModel()
     private val tools: VTools by inject()
 
-    lateinit var editText: EditText
+    private lateinit var editText: EditText
 
     override fun initView() {
         initRV()
@@ -37,15 +42,19 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
         }
         editText.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH && textView.text.isNotBlank()) {
-                viewModel.queryName(editText.text.toString())
+                lifecycleScope.launch {
+                    viewModel.getFileDatabaseByQueryName(editText.text.toString()).collect { list ->
+                        list.forEach { it.itemOrientationSwipe = ItemOrientation.NONE }
+                        withContext(Dispatchers.Main) {
+                            binding.rvSearch.models = list
+                        }
+                    }
+                }
                 imm.hideSoftInputFromWindow(editText.windowToken, 0)
             } else {
                 editText.showSnackBar("Please Input")
             }
             return@setOnEditorActionListener true
-        }
-        viewModel.getFileDatabaseByQueryName.observe(this) {
-            binding.rvSearch.models = it
         }
     }
 

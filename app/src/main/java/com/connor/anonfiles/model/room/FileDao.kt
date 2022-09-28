@@ -31,5 +31,5 @@ interface FileDao {
 
     @Transaction
     @Query("SELECT * FROM FileData WHERE fileName LIKE '%' || :searchName || '%' ")
-    suspend fun queryFileName(searchName: String): List<FileData>
+    fun queryFileName(searchName: String): Flow<List<FileData>>
 }

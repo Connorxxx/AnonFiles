@@ -7,11 +7,8 @@ import com.anggrayudi.storage.file.fullName
 import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
 import com.connor.anonfiles.tools.showToast
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.sink
 import okio.source
@@ -22,8 +19,6 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     private val upFileLiveData = MutableLiveData<File>()
 
     private val dlFileLiveData = MutableLiveData<String>()
-
-    private val fileQueryNameLiveData = MutableLiveData<String>()
 
     val upFileData = upFileLiveData.switchMap {
         liveData(Dispatchers.IO) { emit(repository.postFile(it)) }
@@ -44,11 +39,6 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     }.map {
         repository.postFile(file)
     }.flowOn(Dispatchers.IO)
-        .shareIn(
-            viewModelScope,
-            replay = 0,
-            started = SharingStarted.WhileSubscribed(5000)
-        )
 
     fun dlFlow(url: String) = flow {
         emit(url)
@@ -57,11 +47,7 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     }.flowOn(Dispatchers.IO)
         .catch {
             "The file you are looking for does not exist!".showToast()
-        }.shareIn(
-            viewModelScope,
-            replay = 0,
-            started = SharingStarted.WhileSubscribed(5000)
-        )
+        }
 
     inline fun dlFile(url: String, crossinline block: () -> Unit) {
         viewModelScope.launch {
@@ -71,22 +57,23 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    val getFileDatabase = repository.getFileDatabase().asLiveData(Dispatchers.IO)
+    val getFileDatabase = repository.getFileDatabase() //.asLiveData(Dispatchers.IO)
 
-    val getFileDatabaseByName = repository.getFileDatabaseByName().asLiveData(Dispatchers.IO)
+    val getFileDatabaseByName = repository.getFileDatabaseByName()
 
-    val getFileDatabaseBySize = repository.getFileDatabaseBySize().asLiveData(Dispatchers.IO)
+    val getFileDatabaseBySize = repository.getFileDatabaseBySize()
 
-    val getFileDatabaseByQueryName = Transformations.switchMap(fileQueryNameLiveData) {
+    @OptIn(FlowPreview::class)
+    fun getFileDatabaseByQueryName(name: String) = flow {
+        emit(name)
+    }.flatMapConcat {
         repository.getFileDatabaseByQueryName(it)
-    }
+    }.flowOn(Dispatchers.IO)
+
+
 
     private fun getFileData(file: File) {
         upFileLiveData.postValue(file)
-    }
-
-    fun queryName(fileName: String) {
-        fileQueryNameLiveData.value = fileName
     }
 
     fun downloadFile(url: String) {
