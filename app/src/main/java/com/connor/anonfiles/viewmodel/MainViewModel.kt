@@ -2,11 +2,19 @@ package com.connor.anonfiles.viewmodel
 
 import android.net.Uri
 import androidx.lifecycle.*
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.fullName
+import com.connor.anonfiles.App
 import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
+import com.connor.anonfiles.model.room.FileData
+import com.connor.anonfiles.tools.NetworkTools.toRequestBody
 import com.connor.anonfiles.tools.showToast
+import com.drake.brv.BindingAdapter
+import com.drake.brv.listener.DefaultItemTouchCallback
+import com.drake.net.utils.toRequestBody
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okio.buffer
@@ -99,6 +107,19 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
             }
         }
     }
+
+    fun swiped() = ItemTouchHelper(object : DefaultItemTouchCallback() {
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            //super.onSwiped(viewHolder, direction)
+            val adapter = viewHolder.bindingAdapter as? BindingAdapter
+            val layoutPosition = viewHolder.layoutPosition
+            adapter?.notifyItemRemoved(layoutPosition)
+            (adapter?.models as ArrayList).removeAt(layoutPosition - 1)
+            val fileId = (viewHolder as BindingAdapter.BindingViewHolder)
+                .getModel<FileData>().fileID
+            deleteFileDatabase(fileId!!)
+        }
+    })
 
     private suspend fun getFile(
         uri: Uri,

@@ -10,6 +10,7 @@ import android.widget.EditText
 import androidx.lifecycle.lifecycleScope
 import com.connor.anonfiles.R
 import com.connor.anonfiles.databinding.ActivitySearchBinding
+import com.connor.anonfiles.databinding.DialogDetailsBinding
 import com.connor.anonfiles.model.room.FileData
 import com.connor.anonfiles.tools.VTools
 import com.connor.anonfiles.tools.showSnackBar
@@ -66,12 +67,20 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
         binding.rvSearch.setup {
             addType<FileData>(R.layout.item_file_list)
             R.id.card_fiie_list.onClick {
-                tools.showAlertDialog(this@SearchActivity, layoutInflater) {
+                tools.showAlertDialog<DialogDetailsBinding>(
+                    R.layout.dialog_details,
+                    this@SearchActivity,
+                    layoutInflater
+                ) {
                     it.m = getModel()
                 }
             }
             R.id.img_share.onClick {
-                tools.shareLink(getModel<FileData>().shortUrl!!, this@SearchActivity, binding.rvSearch)
+                tools.shareLink(
+                    getModel<FileData>().shortUrl!!,
+                    this@SearchActivity,
+                    binding.rvSearch
+                )
             }
             R.id.btn_copy.onClick {
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -80,9 +89,9 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
                 binding.rvSearch.showSnackBar("Copy Success")
             }
             R.id.btn_download.onClick {
-               viewModel.dlFile(getModel<FileData>().fullUrl!!) {
-                   binding.rvSearch.showSnackBar("Downloading")
-               }
+                viewModel.dlFile(getModel<FileData>().fullUrl!!) {
+                    binding.rvSearch.showSnackBar("Downloading")
+                }
                 Log.d("TAG", "initRV: ${getModel<FileData>().fullUrl!!}")
             }
         }

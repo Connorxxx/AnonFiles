@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.connor.anonfiles.databinding.ActivityMainBinding
 import com.connor.anonfiles.databinding.DialogBottomSheetBinding
+import com.connor.anonfiles.databinding.DialogDetailsBinding
 import com.connor.anonfiles.model.SortBy
 import com.connor.anonfiles.model.room.FileData
 import com.connor.anonfiles.tools.VTools
@@ -81,51 +82,23 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                         findView<TextView>(R.id.tv_sort_by).text = name
                 }
             }
-            itemTouchHelper = ItemTouchHelper(object : DefaultItemTouchCallback() {
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    //super.onSwiped(viewHolder, direction)
-                    val adapter = viewHolder.bindingAdapter as? BindingAdapter
-                    val layoutPosition = viewHolder.layoutPosition
-                    adapter?.notifyItemRemoved(layoutPosition)
-                    (adapter?.models as ArrayList).removeAt(layoutPosition - 1)
-                    val fileId = (viewHolder as BindingAdapter.BindingViewHolder)
-                        .getModel<FileData>().fileID
-                    viewModel.deleteFileDatabase(fileId!!)
-                }
-            })
+            itemTouchHelper = viewModel.swiped()
             R.id.tv_sort_by.onClick {
-                val bottomSheetDialog = BottomSheetDialog(this@MainActivity)
-                val bindingSheet = DataBindingUtil.inflate<DialogBottomSheetBinding>(
-                    layoutInflater,
+                tools.showBottomSheetDialog<DialogBottomSheetBinding>(
                     R.layout.dialog_bottom_sheet,
-                    null,
-                    false
-                )
-                bottomSheetDialog.setContentView(bindingSheet.root)
-                when (name) {
-                    "Name" -> setCardView(bindingSheet.cardByName)
-                    "Last Add" -> setCardView(bindingSheet.cardByLastAdd)
-                    "Size" -> setCardView(bindingSheet.cardByFileSize)
+                    this@MainActivity,
+                    layoutInflater
+                ) { bindingSheet, bottomSheetDialog ->
+                    when (name) {
+                        "Name" -> setCardView(bindingSheet.cardByName)
+                        "Last Add" -> setCardView(bindingSheet.cardByLastAdd)
+                        "Size" -> setCardView(bindingSheet.cardByFileSize)
+                    }
+                    bottomDialogClick(bindingSheet, bottomSheetDialog)
                 }
-                bindingSheet.cardByName.setOnClickListener {
-                    name = "Name"
-                    getFileDatabaseByName()
-                    bottomSheetDialog.dismiss()
-                }
-                bindingSheet.cardByLastAdd.setOnClickListener {
-                    name = "Last Add"
-                    getFileDatabase()
-                    bottomSheetDialog.dismiss()
-                }
-                bindingSheet.cardByFileSize.setOnClickListener {
-                    name = "Size"
-                    getFileDatabaseBySize()
-                    bottomSheetDialog.dismiss()
-                }
-                bottomSheetDialog.show()
             }
             R.id.card_fiie_list.onClick {
-                tools.showAlertDialog(this@MainActivity, layoutInflater) {
+                tools.showAlertDialog<DialogDetailsBinding>(R.layout.dialog_details, this@MainActivity, layoutInflater) {
                     it.m = getModel()
                 }
             }
@@ -157,6 +130,27 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
         cardView.setCardBackgroundColor(
             ContextCompat.getColor(this, R.color.fab_color)
         )
+    }
+
+    private fun bottomDialogClick(
+        bindingSheet: DialogBottomSheetBinding,
+        bottomSheetDialog: BottomSheetDialog
+    ) {
+        bindingSheet.cardByName.setOnClickListener {
+            name = "Name"
+            getFileDatabaseByName()
+            bottomSheetDialog.dismiss()
+        }
+        bindingSheet.cardByLastAdd.setOnClickListener {
+            name = "Last Add"
+            getFileDatabase()
+            bottomSheetDialog.dismiss()
+        }
+        bindingSheet.cardByFileSize.setOnClickListener {
+            name = "Size"
+            getFileDatabaseBySize()
+            bottomSheetDialog.dismiss()
+        }
     }
 
     private fun getFileDatabaseByName() {

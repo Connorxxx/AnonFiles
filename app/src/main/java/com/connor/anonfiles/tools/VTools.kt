@@ -10,10 +10,13 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import com.connor.anonfiles.R
+import com.connor.anonfiles.databinding.DialogBottomSheetBinding
 import com.connor.anonfiles.databinding.DialogDetailsBinding
 import com.connor.anonfiles.model.room.FileData
 import com.drake.engine.utils.DeviceUtils.getModel
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 
@@ -37,17 +40,41 @@ class VTools {
         context.stopService(stopService)
     }
 
-    inline fun showAlertDialog(context: Context, layoutInflater: LayoutInflater, block: (binding: DialogDetailsBinding) -> Unit) {
+    inline fun <reified T : ViewDataBinding> showAlertDialog(
+        layout: Int,
+        context: Context,
+        layoutInflater: LayoutInflater,
+        block: (binding: T) -> Unit
+    ) {
         val alertDialog = MaterialAlertDialogBuilder(context)
-        val binding = DataBindingUtil.inflate<DialogDetailsBinding>(
+        val binding = DataBindingUtil.inflate<T>(
             layoutInflater,
-            R.layout.dialog_details,
+            layout,
             null,
             false
         )
         block(binding)
         alertDialog.setView(binding.root)
         alertDialog.show()
+    }
+
+    inline fun <reified T : ViewDataBinding> showBottomSheetDialog(
+        layout: Int,
+        context: Context,
+        layoutInflater: LayoutInflater,
+        block: (binding: T, bottomSheetDialog: BottomSheetDialog) -> Unit
+    ) {
+        val bottomSheetDialog = BottomSheetDialog(context)
+        val bindingSheet = DataBindingUtil.inflate<T>(
+            layoutInflater,
+            layout,
+            null,
+            false
+        )
+        bottomSheetDialog.setContentView(bindingSheet.root)
+
+        block(bindingSheet, bottomSheetDialog)
+        bottomSheetDialog.show()
     }
 
     fun openLink(link: String, context: Context, view: View) {
