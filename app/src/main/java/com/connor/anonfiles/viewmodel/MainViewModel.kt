@@ -23,9 +23,9 @@ import java.io.File
 
 class MainViewModel(private val repository: Repository) : ViewModel() {
 
-    private val _uploadChannel = Channel<File>()
+    private val _uploadChannel = Channel<FileData>()
 
-    private val _queryChannel = Channel<String>()
+    private val _queryChannel = Channel<Flow<List<FileData>>>()
 
     val getFileDatabase = repository.getFileDatabase() //.asLiveData(Dispatchers.IO)
 
@@ -34,27 +34,25 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     val getFileDatabaseBySize = repository.getFileDatabaseBySize()
 
     @OptIn(FlowPreview::class)
-    val queryName = _queryChannel.receiveAsFlow().flatMapMerge {
-        repository.getFileDatabaseByQueryName(it)
-    }.onEach {
-        it.forEach { data ->
-            data.itemOrientationSwipe = ItemOrientation.NONE
-        }
-    }.flowOn(Dispatchers.IO)
+    val queryName = _queryChannel.receiveAsFlow()
+        .flatMapMerge { it }
+        .onEach {
+            it.forEach { data ->
+                data.itemOrientationSwipe = ItemOrientation.NONE
+            }
+        }.flowOn(Dispatchers.IO)
 
-    val uploadFLow = _uploadChannel.receiveAsFlow().map {
-        repository.postFile(it)
-    }.flowOn(Dispatchers.IO)
+    val uploadFLow = _uploadChannel.receiveAsFlow()
 
     fun query(name: String) {
         viewModelScope.launch {
-            _queryChannel.trySend(name)
+            _queryChannel.trySend(repository.getFileDatabaseByQueryName(name))
         }
     }
 
     private fun upChannel(file: File) {
         viewModelScope.launch {
-            _uploadChannel.trySend(file)
+            _uploadChannel.trySend(repository.postFile(file))
         }
     }
 
