@@ -24,6 +24,4 @@ class Repository(private val fileDao: FileDao, private val anonNet: AnonNet) {
         fileData.id = fileDao.insertFile(fileData)
         return fileData
     }
-
-    suspend fun downloadFile(url: String) = anonNet.downloadFile(url).await()
 }

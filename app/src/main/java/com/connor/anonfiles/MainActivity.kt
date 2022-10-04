@@ -59,9 +59,11 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
     }
 
     override fun initData() {
-        viewModel.setupSimpleStorage(storageHelper) {
-            binding.rv.showSnackBar("Done")
-            binding.rv.smoothScrollToPosition(0)
+        viewModel.setupSimpleStorage(storageHelper)
+        lifecycleScope.launch {
+            viewModel.uploadFLow.collect {
+                binding.rv.showSnackBar("Done ${it.fileName}")
+            }
         }
     }
 
@@ -98,7 +100,11 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 }
             }
             R.id.card_fiie_list.onClick {
-                tools.showAlertDialog<DialogDetailsBinding>(R.layout.dialog_details, this@MainActivity, layoutInflater) {
+                tools.showAlertDialog<DialogDetailsBinding>(
+                    R.layout.dialog_details,
+                    this@MainActivity,
+                    layoutInflater
+                ) {
                     it.m = getModel()
                 }
             }
@@ -112,9 +118,9 @@ class MainActivity : EngineActivity<ActivityMainBinding>(R.layout.activity_main)
                 binding.rv.showSnackBar("Copy Success")
             }
             R.id.btn_download.onClick {
-                viewModel.dlFile(getModel<FileData>().fullUrl!!) {
-                    binding.rv.showSnackBar("Downloading")
-                }
+                tools.openLink(
+                    getModel<FileData>().fullUrl!!, this@MainActivity, binding.rv
+                )
             }
         }
         binding.rv.bindingAdapter.addHeader(SortBy(), animation = true)

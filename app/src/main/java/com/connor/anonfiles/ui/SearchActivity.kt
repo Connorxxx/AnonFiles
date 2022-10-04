@@ -43,14 +43,7 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
         }
         editText.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH && textView.text.isNotBlank()) {
-                lifecycleScope.launch {
-                    viewModel.getFileDatabaseByQueryName(editText.text.toString()).collect { list ->
-                        list.forEach { it.itemOrientationSwipe = ItemOrientation.NONE }
-                        withContext(Dispatchers.Main) {
-                            binding.rvSearch.models = list
-                        }
-                    }
-                }
+                viewModel.query(editText.text.toString())
                 imm.hideSoftInputFromWindow(editText.windowToken, 0)
             } else {
                 editText.showSnackBar("Please Input")
@@ -60,7 +53,11 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
     }
 
     override fun initData() {
-
+        lifecycleScope.launch {
+            viewModel.queryName.collect { list ->
+                binding.rvSearch.models = list
+            }
+        }
     }
 
     private fun initRV() {
@@ -89,10 +86,9 @@ class SearchActivity : EngineToolbarActivity<ActivitySearchBinding>(R.layout.act
                 binding.rvSearch.showSnackBar("Copy Success")
             }
             R.id.btn_download.onClick {
-                viewModel.dlFile(getModel<FileData>().fullUrl!!) {
-                    binding.rvSearch.showSnackBar("Downloading")
-                }
-                Log.d("TAG", "initRV: ${getModel<FileData>().fullUrl!!}")
+                tools.openLink(
+                    getModel<FileData>().fullUrl!!, this@SearchActivity, binding.rvSearch
+                )
             }
         }
     }

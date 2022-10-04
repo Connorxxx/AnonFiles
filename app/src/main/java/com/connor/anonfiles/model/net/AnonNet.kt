@@ -9,12 +9,6 @@ import java.io.File
 
 class AnonNet {
 
-    suspend fun downloadFile(url: String) = coroutineScope {
-        Get<File>(url)
-    }
-
-
-
     suspend fun postFile(file: File): FileData {
         val data: FileModel = post(file).await()
         val fileData = FileData(

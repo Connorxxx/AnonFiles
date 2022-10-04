@@ -6,16 +6,15 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.fullName
-import com.connor.anonfiles.App
 import com.connor.anonfiles.App.Companion.context
 import com.connor.anonfiles.Repository
 import com.connor.anonfiles.model.room.FileData
-import com.connor.anonfiles.tools.NetworkTools.toRequestBody
 import com.connor.anonfiles.tools.showToast
 import com.drake.brv.BindingAdapter
+import com.drake.brv.annotaion.ItemOrientation
 import com.drake.brv.listener.DefaultItemTouchCallback
-import com.drake.net.utils.toRequestBody
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import okio.buffer
 import okio.sink
@@ -24,46 +23,9 @@ import java.io.File
 
 class MainViewModel(private val repository: Repository) : ViewModel() {
 
-    private val upFileLiveData = MutableLiveData<File>()
+    private val _uploadChannel = Channel<File>()
 
-    private val dlFileLiveData = MutableLiveData<String>()
-
-    val upFileData = upFileLiveData.switchMap {
-        liveData(Dispatchers.IO) { emit(repository.postFile(it)) }
-    }
-
-    val dlLiveData = dlFileLiveData.switchMap {
-        liveData(Dispatchers.IO) {
-            kotlin.runCatching { emit(repository.downloadFile(it)) }.onFailure {
-                withContext(Dispatchers.Main) {
-                    "The file you are looking for does not exist!".showToast()
-                }
-            }
-        }
-    }
-
-    private fun upFlow(file: File) = flow {
-        emit(file)
-    }.map {
-        repository.postFile(file)
-    }.flowOn(Dispatchers.IO)
-
-    fun dlFlow(url: String) = flow {
-        emit(url)
-    }.map {
-        repository.downloadFile(it)
-    }.flowOn(Dispatchers.IO)
-        .catch {
-            "The file you are looking for does not exist!".showToast()
-        }
-
-    inline fun dlFile(url: String, crossinline block: () -> Unit) {
-        viewModelScope.launch {
-            dlFlow(url).collect {
-                block()
-            }
-        }
-    }
+    private val _queryChannel = Channel<String>()
 
     val getFileDatabase = repository.getFileDatabase() //.asLiveData(Dispatchers.IO)
 
@@ -72,20 +34,28 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     val getFileDatabaseBySize = repository.getFileDatabaseBySize()
 
     @OptIn(FlowPreview::class)
-    fun getFileDatabaseByQueryName(name: String) = flow {
-        emit(name)
-    }.flatMapConcat {
+    val queryName = _queryChannel.receiveAsFlow().flatMapMerge {
         repository.getFileDatabaseByQueryName(it)
+    }.onEach {
+        it.forEach { data ->
+            data.itemOrientationSwipe = ItemOrientation.NONE
+        }
     }.flowOn(Dispatchers.IO)
 
+    val uploadFLow = _uploadChannel.receiveAsFlow().map {
+        repository.postFile(it)
+    }.flowOn(Dispatchers.IO)
 
-
-    private fun getFileData(file: File) {
-        upFileLiveData.postValue(file)
+    fun query(name: String) {
+        viewModelScope.launch {
+            _queryChannel.trySend(name)
+        }
     }
 
-    fun downloadFile(url: String) {
-        dlFileLiveData.value = url
+    private fun upChannel(file: File) {
+        viewModelScope.launch {
+            _uploadChannel.trySend(file)
+        }
     }
 
     fun deleteFileDatabase(fileId: String) {
@@ -94,16 +64,12 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun setupSimpleStorage(storageHelper: SimpleStorageHelper, block: () -> Unit) {
+    fun setupSimpleStorage(storageHelper: SimpleStorageHelper) {
         storageHelper.onFileSelected = { _, files ->
             val documentFile = files.first()
             viewModelScope.launch(Dispatchers.IO) {
                 val file = getFile(documentFile.uri, documentFile.fullName)
-                upFlow(file).collect {
-                    withContext(Dispatchers.Main) {
-                        block()
-                    }
-                }
+                upChannel(file)
             }
         }
     }
